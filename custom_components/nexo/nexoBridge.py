@@ -76,7 +76,7 @@ class NexoBridge:
                     if self.initialized:
                         self.refresh_resources()
                     async for message in web_socket:
-                        self.on_message(message)
+                        self._safe_on_message(message)
             except (OSError, websockets.exceptions.WebSocketException) as err:
                 _LOGGER.warning("Nexo WS error: %s", err)
             finally:
@@ -127,6 +127,13 @@ class NexoBridge:
             t -= 1
         if not self.initialized:
             raise TimeoutError("Timed out waiting for Nexo initial_data")
+
+    def _safe_on_message(self, message: str) -> None:
+        """Keep the receive loop alive when a single message cannot be handled."""
+        try:
+            self.on_message(message)
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.exception("Failed to handle Nexo message")
 
     def on_message(self, message: str) -> None:
         """Dispatch a decoded bridge message by operation."""

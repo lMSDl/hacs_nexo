@@ -115,6 +115,19 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
             await self.bridge.disconnect()
         self.assertEqual(self.bridge.resources[1].state, {"is_on": 0})
 
+    async def test_malformed_message_does_not_stop_the_receive_loop(self):
+        broken = {"op": "data_update", "resources": {"1": {"state": {}}}}
+        update = {"op": "data_update", "resources": {"1": {"id": 1, "state": {"is_on": 0}}}}
+        self.bridge.add_resource({"id": 1, "name": "light", "type": "light", "state": {"is_on": 1}})
+        sock = FakeSocket([json.dumps(broken), json.dumps(update)])
+        with patch.object(BRIDGE.websockets, "connect", return_value=sock):
+            self.bridge._task = asyncio.create_task(self.bridge._run())
+            for _ in range(5):
+                await asyncio.sleep(0)
+            self.assertFalse(self.bridge._task.done())
+            await self.bridge.disconnect()
+        self.assertEqual(self.bridge.resources[1].state, {"is_on": 0})
+
     async def test_command_press_resolves_active_socket_and_escapes_json(self):
         first, second = FakeSocket(), FakeSocket()
         self.bridge.ws = first
