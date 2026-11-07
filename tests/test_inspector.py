@@ -16,6 +16,7 @@ class SnapshotTests(unittest.TestCase):
         bridge.raw_data_model = {}
         bridge.update_resources = Mock()
         bridge.refresh_resources = Mock()
+        bridge._apply_resource_states = Mock()
         first = {"op": "initial_data", "resources": {"1": {"name": "first"}}}
         second = {"op": "initial_data", "resources": {"1": {"name": "latest"}}}
         bridge.on_message_initial_data(first)

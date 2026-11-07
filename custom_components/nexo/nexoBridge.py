@@ -169,6 +169,7 @@ class NexoBridge:
             self.update_resources()
         else:
             self.refresh_resources()
+            self._apply_resource_states(json_message)
 
     def update_resources(self) -> None:
         """Create resource objects from the first initialization response."""
@@ -191,15 +192,17 @@ class NexoBridge:
         for resource in self.resources.values():
             resource.web_socket = self.ws
 
+    def _apply_resource_states(self, json_message: dict) -> None:
+        """Copy announced resource states and notify entity callbacks."""
+        for key, res_obj in json_message.get("resources", {}).items():
+            resource = self.get_resource_by_id(res_obj.get("id", key))
+            if resource is not None and "state" in res_obj:
+                resource.state = res_obj["state"]
+                resource.publish_update(self._loop)
+
     def on_message_data_update(self, json_message: dict) -> None:
         """Apply resource state changes and notify entity callbacks."""
-        if "resources" in json_message:
-            for res in json_message["resources"]:
-                res_obj = json_message["resources"][res]
-                resource = self.get_resource_by_id(res_obj["id"])
-                if resource is not None and "state" in res_obj:
-                    resource.state = res_obj["state"]
-                    resource.publish_update(self._loop)
+        self._apply_resource_states(json_message)
 
     def get_resource_by_id(self, resource_id) -> NexoResource | None:
         """Look up a resource by its bridge identifier."""

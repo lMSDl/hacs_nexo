@@ -142,6 +142,19 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(BRIDGE.HomeAssistantError):
             await self.bridge.async_send_ext_command("open")
 
+    async def test_repeated_initial_data_refreshes_states(self):
+        first = {"op": "initial_data", "resources": {"1": {"id": 1, "name": "l", "type": "light", "state": {"is_on": 1}}}}
+        second = {"op": "initial_data", "resources": {"1": {"id": 1, "name": "l", "type": "light", "state": {"is_on": 0}}}}
+        self.bridge.on_message(json.dumps(first))
+        resource = self.bridge.resources[1]
+        callback = Mock()
+        resource.register_callback(callback)
+        self.bridge.on_message(json.dumps(second))
+        for _ in range(5):
+            await asyncio.sleep(0)
+        self.assertEqual(resource.state, {"is_on": 0})
+        callback.assert_called_once()
+
     async def test_resource_send_failure_is_logged_and_raised(self):
         sock = FakeSocket()
         sock.send.side_effect = BrokenPipeError()
