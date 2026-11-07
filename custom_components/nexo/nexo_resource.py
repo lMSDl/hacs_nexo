@@ -6,7 +6,7 @@ import inspect
 import logging
 from typing import Final
 
-import websockets
+from websockets.exceptions import WebSocketException
 
 
 class NexoResource:
@@ -47,12 +47,7 @@ class NexoResource:
         """Send a message to the websocket — safe, non-crashing."""
         try:
             await self.web_socket.send(message)
-        except (
-            BrokenPipeError,
-            OSError,
-            websockets.exceptions.ConnectionClosed,
-            websockets.exceptions.WebSocketException,
-        ) as ex:
+        except (OSError, WebSocketException) as ex:
             self._LOGGER.warning(
                 "Nexo WS: send failed for resource id=%s name=%s — "
                 "waiting for auto-reconnect. Error: %s",

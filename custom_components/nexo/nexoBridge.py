@@ -10,6 +10,7 @@ import logging
 from typing import Final
 
 import websockets
+from websockets.exceptions import WebSocketException
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import DEFAULT_PORT
@@ -77,7 +78,7 @@ class NexoBridge:
                         self.refresh_resources()
                     async for message in web_socket:
                         self._safe_on_message(message)
-            except (OSError, websockets.exceptions.WebSocketException) as err:
+            except (OSError, WebSocketException) as err:
                 _LOGGER.warning("Nexo WS error: %s", err)
             finally:
                 self.connected = False
@@ -273,7 +274,7 @@ class NexoBridge:
         payload = json.dumps({"type": "ext_command", "cmd": command})
         try:
             await self.ws.send(payload)
-        except (OSError, websockets.exceptions.WebSocketException) as err:
+        except (OSError, WebSocketException) as err:
             raise HomeAssistantError("Unable to send command to Nexo bridge") from err
 
     def add_resource(self, nexo_resource: dict) -> None:

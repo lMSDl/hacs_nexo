@@ -19,7 +19,8 @@ def _load_modules():
     package.__path__ = [str(root)]
     stubs = {name: package}
     for module in ("homeassistant", "homeassistant.config_entries", "homeassistant.const",
-                   "homeassistant.core", "homeassistant.exceptions", "homeassistant.helpers", "websockets"):
+                   "homeassistant.core", "homeassistant.exceptions", "homeassistant.helpers", "websockets",
+                   "websockets.exceptions"):
         stubs[module] = ModuleType(module)
     stubs["homeassistant.helpers"].config_validation = SimpleNamespace(config_entry_only_config_schema=lambda domain: {})
     stubs["homeassistant.config_entries"].ConfigEntry = SimpleNamespace
@@ -32,10 +33,8 @@ def _load_modules():
     })
     stubs["homeassistant.exceptions"].HomeAssistantError = type("HomeAssistantError", (Exception,), {})
     stubs["homeassistant.exceptions"].ConfigEntryNotReady = type("ConfigEntryNotReady", (Exception,), {})
-    stubs["websockets"].exceptions = SimpleNamespace(
-        WebSocketException=type("WebSocketException", (Exception,), {}),
-        ConnectionClosed=type("ConnectionClosed", (Exception,), {}),
-    )
+    stubs["websockets.exceptions"].WebSocketException = type("WebSocketException", (Exception,), {})
+    stubs["websockets"].exceptions = stubs["websockets.exceptions"]
     stubs["websockets"].connect = Mock()
     with patch.dict(sys.modules, stubs):
         bridge = importlib.import_module(f"{name}.nexoBridge")
