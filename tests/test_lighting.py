@@ -29,7 +29,7 @@ def _load_modules():
     for name in (
         "homeassistant", "homeassistant.components", "homeassistant.components.light",
         "homeassistant.components.switch", "homeassistant.config_entries",
-        "homeassistant.core", "homeassistant.helpers", "homeassistant.helpers.entity_platform",
+        "homeassistant.core", "homeassistant.exceptions", "homeassistant.helpers", "homeassistant.helpers.entity_platform",
         "websockets", "websockets.exceptions",
     ):
         stubs[name] = ModuleType(name)
@@ -42,6 +42,7 @@ def _load_modules():
     stubs["homeassistant.helpers.entity_platform"].AddEntitiesCallback = object
     stubs["websockets.exceptions"].WebSocketException = type("WebSocketException", (Exception,), {})
     stubs["websockets"].exceptions = stubs["websockets.exceptions"]
+    stubs["homeassistant.exceptions"].HomeAssistantError = type("HomeAssistantError", (Exception,), {})
     bridge_stub = ModuleType(f"{package_name}.nexoBridge")
     bridge_stub.NexoBridge = object
     stubs[bridge_stub.__name__] = bridge_stub

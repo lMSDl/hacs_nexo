@@ -142,12 +142,13 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(BRIDGE.HomeAssistantError):
             await self.bridge.async_send_ext_command("open")
 
-    async def test_resource_send_failure_is_logged_not_raised(self):
+    async def test_resource_send_failure_is_logged_and_raised(self):
         sock = FakeSocket()
         sock.send.side_effect = BrokenPipeError()
         resource = BRIDGE.NexoResource(sock, id=1, name="out", state={})
         with patch.object(resource._LOGGER, "warning") as warning:
-            await resource._async_send("{}")
+            with self.assertRaises(BRIDGE.HomeAssistantError):
+                await resource._async_send("{}")
         warning.assert_called_once()
 
     async def test_late_commands_dispatch_once_and_weather_stays_local(self):

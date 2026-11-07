@@ -6,6 +6,7 @@ import inspect
 import logging
 from typing import Final
 
+from homeassistant.exceptions import HomeAssistantError
 from websockets.exceptions import WebSocketException
 
 
@@ -44,17 +45,17 @@ class NexoResource:
             self._LOGGER.exception("Nexo resource callback failed for %s", self.id)
 
     async def _async_send(self, message) -> None:
-        """Send a message to the websocket — safe, non-crashing."""
+        """Send a message to the bridge; report a dropped link to the caller."""
         try:
             await self.web_socket.send(message)
         except (OSError, WebSocketException) as ex:
             self._LOGGER.warning(
-                "Nexo WS: send failed for resource id=%s name=%s — "
-                "waiting for auto-reconnect. Error: %s",
+                "Nexo WS: send failed for resource id=%s name=%s: %s",
                 self._id,
                 self._name,
                 ex,
             )
+            raise HomeAssistantError("Unable to send command to Nexo bridge") from ex
         except Exception as ex:  # pylint: disable=broad-exception-caught
             self._LOGGER.error(
                 "Nexo WS: unexpected send error for resource id=%s: %s",
