@@ -22,6 +22,9 @@
 - Run synchronous and asynchronous resource callbacks without awaiting non-awaitable results.
 - Replaced the thread-based `websocket-client`/`rel` connection with an asynchronous `websockets` client (keepalive via protocol pings, reconnect loop, non-blocking sends); fixes broken pipe errors.
 - Improved initialization and resource load handling to avoid stale or broken connection states during startup.
+- Kept the receive loop alive when a single bridge message cannot be handled.
+- Report failed resource commands to Home Assistant instead of dropping them silently.
+- Refresh resource states from repeated initial data after a reconnect.
 - Hardened WebSocket error handling and reconnect timing for more reliable operation in Home Assistant.
 
 ## [1.2.0] - 19.03.2024
