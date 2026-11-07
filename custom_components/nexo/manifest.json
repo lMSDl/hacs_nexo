@@ -19,7 +19,7 @@
     "nexo"
   ],
   "requirements": [
-    "websockets"
+    "websockets>=15.0.1"
   ],
   "ssdp": [],
   "version": "1.5.1",
