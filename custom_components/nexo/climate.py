@@ -51,7 +51,7 @@ class HANexoClimate(HANexo, ClimateEntity):
         ]
         self._attr_min_temp = nexo_termostat.min
         self._attr_max_temp = nexo_termostat.max
-        self._attr_temperature_unit = UnitOfTemperature.CELSIUS
+        self._attr_native_temperature_unit = UnitOfTemperature.CELSIUS
 
     @property
     def hvac_mode(self) -> HVACMode:
