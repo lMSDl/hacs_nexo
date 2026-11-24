@@ -63,6 +63,9 @@ class ClimateTests(unittest.TestCase):
     def test_native_target_temperature_is_in_degrees(self):
         self.assertEqual(self.make_entity().native_target_temperature, 20.5)
 
+    def test_native_temperature_unit_is_celsius(self):
+        self.assertEqual(self.make_entity()._attr_native_temperature_unit, "°C")
+
 
 if __name__ == "__main__":
     unittest.main()
